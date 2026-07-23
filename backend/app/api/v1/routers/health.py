@@ -1,10 +1,9 @@
-"""Health check endpoint — verifies API, DB, and Redis connectivity."""
+"""Health check endpoint — verifies API and database connectivity."""
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.redis_client import ping_redis
 
 router = APIRouter(tags=["system"])
 
@@ -18,11 +17,9 @@ async def health(db: AsyncSession = Depends(get_db)) -> dict:
     except Exception:
         db_ok = False
 
-    redis_ok = await ping_redis()
-
-    status = "ok" if (db_ok and redis_ok) else "degraded"
+    status = "ok" if db_ok else "degraded"
     return {
         "success": True,
-        "data": {"status": status, "db": db_ok, "redis": redis_ok},
+        "data": {"status": status, "db": db_ok},
         "message": "OK",
     }
