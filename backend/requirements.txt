@@ -4,22 +4,23 @@ uvicorn[standard]==0.34.0
 pydantic==2.10.4
 pydantic-settings==2.7.1
 
-# ─── Database ───────────────────────────
+# ─── Database (MySQL, async) ────────────
 sqlalchemy[asyncio]==2.0.36
-asyncpg==0.30.0
+aiomysql==0.2.0
 alembic==1.14.0
-pgvector==0.3.6
-
-# ─── Cache / Redis ──────────────────────
-redis==5.2.1
+# aiosqlite sirf local testing ke liye (optional)
+aiosqlite==0.20.0
 
 # ─── Auth / Security ────────────────────
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.20
 
-# ─── HTTP client (AI/Ollama) ────────────
+# ─── AI (Hugging Face) + HTTP ───────────
 httpx==0.28.1
+
+# ─── Embeddings math (RAG, local JSON store) ───
+numpy==2.2.1
 
 # ─── Testing ────────────────────────────
 pytest==8.3.4
