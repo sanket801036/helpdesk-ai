@@ -46,5 +46,17 @@ services:
       sh -c "alembic upgrade head &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
+  frontend:
+    build: ./frontend
+    container_name: helpdesk_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      # Browser (host) se backend localhost:8000 par call karega
+      VITE_API_BASE_URL: "http://localhost:8000/api/v1"
+    ports:
+      - "5173:5173"
+
 volumes:
   pgdata:
