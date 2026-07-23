@@ -3,6 +3,9 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Sab helpdesk tables is prefix ke saath banenge (existing ERP tables se collision na ho)
+TABLE_PREFIX = "helpdesk_"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -16,13 +19,12 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     BACKEND_CORS_ORIGINS: str = "http://localhost:5173"
 
-    # ── Database ──
+    # ── Database (MySQL) ──
+    # Real values .env se aayenge (git me commit nahi hote).
+    # Format: mysql+aiomysql://USER:PASSWORD@HOST:PORT/DB?charset=utf8mb4
     DATABASE_URL: str = (
-        "postgresql+asyncpg://helpdesk:helpdesk@db:5432/helpdesk"
+        "mysql+aiomysql://user:pass@localhost:3306/helpdesk?charset=utf8mb4"
     )
-
-    # ── Redis ──
-    REDIS_URL: str = "redis://redis:6379/0"
 
     # ── JWT ──
     JWT_SECRET_KEY: str = "change_me"
@@ -30,12 +32,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # ── AI ──
-    AI_PROVIDER: str = "ollama"
-    OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "llama3.1"
-    OLLAMA_EMBED_MODEL: str = "nomic-embed-text"
-    EMBEDDING_DIM: int = 768
+    # ── AI (Hugging Face) ──
+    AI_PROVIDER: str = "huggingface"
+    HF_API_KEY: str = ""
+    HF_LLM_MODEL: str = "mistralai/Mistral-7B-Instruct-v0.3"
+    HF_EMBED_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+    HF_API_BASE: str = "https://api-inference.huggingface.co"
+    EMBEDDING_DIM: int = 384  # all-MiniLM-L6-v2
 
     @property
     def cors_origins(self) -> list[str]:
