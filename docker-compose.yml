@@ -1,0 +1,66 @@
+# =========================================================
+#  Helpdesk AI — docker-compose (SKELETON — Phase 2)
+#  backend/frontend services Phase 3/4 me enable honge.
+# =========================================================
+version: "3.9"
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: helpdesk_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: helpdesk_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Phase 3 me uncomment/enable hoga ───────────────
+  # backend:
+  #   build: ./backend
+  #   container_name: helpdesk_backend
+  #   env_file: .env
+  #   depends_on:
+  #     db: { condition: service_healthy }
+  #     redis: { condition: service_healthy }
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./backend:/app
+
+  # ─── Phase 4 me uncomment/enable hoga ───────────────
+  # frontend:
+  #   build: ./frontend
+  #   container_name: helpdesk_frontend
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./frontend:/app
+
+volumes:
+  pgdata:
+  redis-data:
