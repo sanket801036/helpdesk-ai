@@ -1,96 +1,89 @@
 # 05 — Backend
 
-> **Phase 3 — Backend Setup.** FastAPI skeleton ready (config, async DB, JWT, Redis,
-> Alembic, `/health`, dummy `User` model). Feature modules Phase 5+ me aayenge.
+> **Phase 3 — Backend Setup (VERIFIED ✅).** FastAPI skeleton ready. Migration test pass.
+> Stack: **MySQL** (no Docker, no Redis). AI = **Hugging Face**. Tables prefix: `helpdesk_`.
 
 ---
 
-## 1. Setup (local)
+## 1. Setup (aapke laptop par)
 
 ```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate   # win: .venv\Scripts\activate
-pip install -r requirements.txt
-cp ../.env.example .env        # values bharo (ya root .env use karo)
+git clone https://github.com/sanket801036/helpdesk-ai.git
+cd helpdesk-ai/backend
 
-# migrations
-alembic revision --autogenerate -m "create users table"
+python -m venv .venv
+.venv\Scripts\activate            # Windows
+pip install -r requirements.txt
+
+# env
+copy ..\.env.example .env         # .env me apna DATABASE_URL + HF_API_KEY bharo
+# DATABASE_URL=mysql+aiomysql://erp_user:root@localhost:3306/erp?charset=utf8mb4
+
+# migration (tables banega -> helpdesk_users)
 alembic upgrade head
 
 # run
 uvicorn app.main:app --reload
 ```
-- API root: http://localhost:8000/
+- Root: http://localhost:8000/
 - Swagger: http://localhost:8000/api/v1/docs
-- Health: http://localhost:8000/api/v1/health
+- Health: http://localhost:8000/api/v1/health  → `{status: ok, db: true}`
 
-Docker se: `docker-compose up --build` (backend + db + redis).
+> ⚠️ **Note:** Ye backend jis machine par chalega usi se MySQL reachable hona chahiye.
+> Aapke laptop par MySQL local hai to `localhost` use karo (ya `192.168.1.64`).
 
 ---
 
-## 2. Folder Structure
+## 2. Stack (updated)
+
+| Cheez | Value |
+|-------|-------|
+| DB | **MySQL** (driver: `aiomysql`) |
+| Migrations | Alembic (async) |
+| AI | **Hugging Face Inference API** |
+| Embeddings | JSON file (RAG), numpy cosine — no pgvector |
+| Redis | ❌ nahi (hata diya) |
+| Docker | ❌ abhi nahi |
+| Table prefix | `helpdesk_` (existing ERP tables safe) |
+
+---
+
+## 3. Folder Structure
 
 ```
 backend/
 ├── app/
 │   ├── main.py                  # FastAPI app factory
 │   ├── core/
-│   │   ├── config.py            # settings (pydantic-settings)
+│   │   ├── config.py            # settings + TABLE_PREFIX
 │   │   ├── database.py          # async engine, session, Base, get_db
-│   │   ├── security.py          # password hash + JWT
-│   │   └── redis_client.py      # redis connection + ping
+│   │   └── security.py          # password hash + JWT
 │   ├── models/
-│   │   ├── mixins.py            # UUIDMixin, TimestampMixin
-│   │   └── user.py              # User model (dummy/base)
-│   └── api/
-│       └── v1/
-│           ├── router.py        # aggregates routers
-│           └── routers/
-│               └── health.py    # /health (db + redis check)
-├── alembic/                     # migrations env
+│   │   ├── mixins.py            # UUID (generic) + timestamps
+│   │   └── user.py              # User -> helpdesk_users
+│   └── api/v1/
+│       ├── router.py
+│       └── routers/health.py    # /health (db check)
+├── alembic/
+│   └── versions/0001_initial_helpdesk_users.py
 ├── alembic.ini
-├── tests/
-│   └── test_health.py
+├── tests/test_health.py
 ├── requirements.txt
-└── Dockerfile
+└── Dockerfile                   # (optional, abhi use nahi)
 ```
 
 ---
 
-## 3. Core Building Blocks
+## 4. Verification (Phase 3 done)
+- ✅ App imports (saare modules load)
+- ✅ `pytest` green (endpoint responds)
+- ✅ `alembic upgrade head` → `helpdesk_users` table + unique email index bani
+- ✅ `alembic current` → `0001_initial (head)`
 
-| File | Kya |
-|------|-----|
-| `core/config.py` | Env-driven settings, `settings` singleton |
-| `core/database.py` | Async SQLAlchemy engine + `get_db()` dependency + `Base` |
-| `core/security.py` | `hash_password`, `verify_password`, JWT create/decode |
-| `core/redis_client.py` | Async Redis client + `ping_redis()` |
-| `models/mixins.py` | UUID PK + `created_at`/`updated_at` (convention §7) |
-| `models/user.py` | `User` + `UserRole` enum — proves DB/migration |
-| `api/v1/routers/health.py` | `/health` → `{status, db, redis}` |
-| `main.py` | app factory, CORS, router mount, `/` root |
+(Ye SQLite par verify hua — kyunki build-machine se aapka MySQL reachable nahi.
+Aapke laptop par same migration MySQL `erp` DB me `helpdesk_users` banayega.)
 
 ---
 
-## 4. Layering (recap)
-`Router → Service → Repository → Model` (MASTER_GUIDE §4).
-Abhi sirf skeleton; services/repositories Phase 5 se add honge.
-
----
-
-## 5. Migrations (Alembic)
-- Async `env.py` — DB URL `settings.DATABASE_URL` se.
-- Models `alembic/env.py` me import hote hain (metadata detect ke liye).
-- Flow: `alembic revision --autogenerate -m "..."` → `alembic upgrade head`.
-- pgvector extension pehli real migration me: `CREATE EXTENSION IF NOT EXISTS vector;`
-
----
-
-## 6. Testing
-- `pytest` — abhi ek smoke test (`test_health.py` root endpoint).
-- DB/Redis integration tests Phase 14 me.
-
----
-
-## 7. Next
-**Phase 4 — Frontend Setup** (React + TS + Tailwind + routing + api client).
+## 5. Next
+**Phase 4 — Frontend Setup** (React + TS + Tailwind).
