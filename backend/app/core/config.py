@@ -19,11 +19,11 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     BACKEND_CORS_ORIGINS: str = "http://localhost:5173"
 
-    # ── Database (MySQL) ──
+    # ── Database (PostgreSQL) ──
     # Real values .env se aayenge (git me commit nahi hote).
-    # Format: mysql+aiomysql://USER:PASSWORD@HOST:PORT/DB?charset=utf8mb4
+    # Format: postgresql+asyncpg://USER:PASSWORD@HOST:PORT/DB
     DATABASE_URL: str = (
-        "mysql+aiomysql://user:pass@localhost:3306/helpdesk?charset=utf8mb4"
+        "postgresql+asyncpg://helpdesk:helpdesk@localhost:5432/helpdesk"
     )
 
     # ── JWT ──
