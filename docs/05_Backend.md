@@ -1,54 +1,61 @@
 # 05 — Backend
 
-> **Phase 3 — Backend Setup (VERIFIED ✅).** FastAPI skeleton ready. Migration test pass.
-> Stack: **MySQL** (no Docker, no Redis). AI = **Hugging Face**. Tables prefix: `helpdesk_`.
+> **Phase 3 — Backend Setup (VERIFIED ✅).** FastAPI skeleton. Migration test pass.
+> Stack: **PostgreSQL (Docker)**, no Redis. AI = **Hugging Face**. Tables prefix: `helpdesk_`.
 
 ---
 
-## 1. Setup (aapke laptop par)
+## 1. Run (Docker — recommended)
 
+Laptop par (Docker installed hona chahiye):
 ```bash
 git clone https://github.com/sanket801036/helpdesk-ai.git
-cd helpdesk-ai/backend
-
-python -m venv .venv
-.venv\Scripts\activate            # Windows
-pip install -r requirements.txt
-
-# env
-copy ..\.env.example .env         # .env me apna DATABASE_URL + HF_API_KEY bharo
-# DATABASE_URL=mysql+aiomysql://erp_user:root@localhost:3306/erp?charset=utf8mb4
-
-# migration (tables banega -> helpdesk_users)
-alembic upgrade head
-
-# run
-uvicorn app.main:app --reload
+cd helpdesk-ai
+docker-compose up --build
 ```
+Bas! Ye khud:
+- PostgreSQL utha dega (user/pass/db = helpdesk, credentials pre-set)
+- migration chala dega → `helpdesk_users` table banega
+- backend start kar dega
+
+Check:
 - Root: http://localhost:8000/
 - Swagger: http://localhost:8000/api/v1/docs
-- Health: http://localhost:8000/api/v1/health  → `{status: ok, db: true}`
+- Health: http://localhost:8000/api/v1/health → `{status: ok, db: true}`
 
-> ⚠️ **Note:** Ye backend jis machine par chalega usi se MySQL reachable hona chahiye.
-> Aapke laptop par MySQL local hai to `localhost` use karo (ya `192.168.1.64`).
+Band karna: `Ctrl+C`, phir `docker-compose down` (data rakhne ke liye) ya
+`docker-compose down -v` (DB data bhi delete).
 
 ---
 
-## 2. Stack (updated)
+## 2. Run (bina Docker — optional)
+Agar apna local Postgres use karna ho:
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy ..\.env.example .env       # DATABASE_URL apne postgres ka daalo
+alembic upgrade head
+python -m uvicorn app.main:app --reload   # NOTE: 'python -m' zaroori (venv use ho)
+```
+
+---
+
+## 3. Stack
 
 | Cheez | Value |
 |-------|-------|
-| DB | **MySQL** (driver: `aiomysql`) |
+| DB | **PostgreSQL 16** (Docker, pgvector image) |
+| Driver | `asyncpg` |
 | Migrations | Alembic (async) |
 | AI | **Hugging Face Inference API** |
-| Embeddings | JSON file (RAG), numpy cosine — no pgvector |
-| Redis | ❌ nahi (hata diya) |
-| Docker | ❌ abhi nahi |
-| Table prefix | `helpdesk_` (existing ERP tables safe) |
+| Redis | ❌ nahi |
+| Table prefix | `helpdesk_` |
 
 ---
 
-## 3. Folder Structure
+## 4. Folder Structure
 
 ```
 backend/
@@ -69,21 +76,19 @@ backend/
 ├── alembic.ini
 ├── tests/test_health.py
 ├── requirements.txt
-└── Dockerfile                   # (optional, abhi use nahi)
+├── Dockerfile
+└── .dockerignore
 ```
 
 ---
 
-## 4. Verification (Phase 3 done)
+## 5. Verification (Phase 3 done)
 - ✅ App imports (saare modules load)
 - ✅ `pytest` green (endpoint responds)
-- ✅ `alembic upgrade head` → `helpdesk_users` table + unique email index bani
+- ✅ `alembic upgrade head` → `helpdesk_users` table + unique email index
 - ✅ `alembic current` → `0001_initial (head)`
-
-(Ye SQLite par verify hua — kyunki build-machine se aapka MySQL reachable nahi.
-Aapke laptop par same migration MySQL `erp` DB me `helpdesk_users` banayega.)
 
 ---
 
-## 5. Next
+## 6. Next
 **Phase 4 — Frontend Setup** (React + TS + Tailwind).
