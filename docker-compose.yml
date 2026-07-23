@@ -37,18 +37,18 @@ services:
       timeout: 5s
       retries: 5
 
-  # ─── Phase 3 me uncomment/enable hoga ───────────────
-  # backend:
-  #   build: ./backend
-  #   container_name: helpdesk_backend
-  #   env_file: .env
-  #   depends_on:
-  #     db: { condition: service_healthy }
-  #     redis: { condition: service_healthy }
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - ./backend:/app
+  backend:
+    build: ./backend
+    container_name: helpdesk_backend
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
 
   # ─── Phase 4 me uncomment/enable hoga ───────────────
   # frontend:
